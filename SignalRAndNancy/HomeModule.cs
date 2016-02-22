@@ -13,7 +13,7 @@ namespace SignalRAndNancy
         {
             Get["/"] = _ =>
             {
-                return "Hello NDC London from Nancy";
+                return "Hello ConFoo from Nancy";
             };
         }
     }

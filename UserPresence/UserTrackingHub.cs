@@ -70,7 +70,7 @@ namespace UserPresence
             }
         }
 
-        public override async Task OnDisconnected()
+        public override async Task OnDisconnected(bool stopCalled)
         {
             using (var db = new UserContext())
             {

@@ -5,6 +5,9 @@ using Microsoft.AspNet.SignalR.Infrastructure;
 using Microsoft.Owin;
 using Ninject;
 using Owin;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNet.SignalR.Hubs;
 
 [assembly: OwinStartup(typeof(DependencyInjection.Startup))]
 
@@ -15,23 +18,29 @@ namespace DependencyInjection
         public void Configuration(IAppBuilder app)
         {
             var kernel = new StandardKernel();
-            kernel.Bind<IClockService>().To<ClockService>()
-                  .InSingletonScope();
-
             var resolver = new NinjectDependencyResolver(kernel);
 
-            // This is kind gross but we'll improve it in the future
-            kernel.Bind<IHubContext>()
-                  .ToConstant(resolver.Resolve<IConnectionManager>()
-                                      .GetHubContext<Clock>())
-                  .WhenInjectedInto<ClockService>();
+            kernel.Bind<IClockService>()
+                  .To<ClockService>()
+                  .InSingletonScope();
 
             // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=316888
 
-            app.MapSignalR(new HubConfiguration
-            {
-                Resolver = resolver
-            });
+            kernel.Bind(typeof(IHubConnectionContext<dynamic>))
+                .ToMethod(context =>
+                    resolver.Resolve<IConnectionManager>()
+                            .GetHubContext<Clock>()
+                            .Clients
+                   ).WhenInjectedInto<ClockService>();
+
+            var config = new HubConfiguration();
+            config.Resolver = resolver;
+            ConfigureSignalR(app, config);
+        }
+
+        public static void ConfigureSignalR(IAppBuilder app, HubConfiguration config)
+        {
+            app.MapSignalR(config);
         }
     }
 
@@ -47,6 +56,11 @@ namespace DependencyInjection
         public override object GetService(Type serviceType)
         {
             return _kernel.TryGet(serviceType) ?? base.GetService(serviceType);
+        }
+
+        public override IEnumerable<object> GetServices(Type serviceType)
+        {
+            return _kernel.GetAll(serviceType).Concat(base.GetServices(serviceType));
         }
     }
 }

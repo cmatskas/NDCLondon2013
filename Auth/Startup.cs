@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
@@ -25,7 +24,7 @@ namespace WebApplication22
                     var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationType);
                     identity.AddClaim(new Claim(ClaimTypes.Name, username));
                     
-                    if (String.Equals(username, "Damian", StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(username, "Christos", StringComparison.OrdinalIgnoreCase))
                     {
                         identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
                     }

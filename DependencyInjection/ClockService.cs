@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
 
 namespace DependencyInjection
 {
     public class ClockService : IClockService
     {
         private Timer _timer;
-        private readonly IHubContext _context;
+        private readonly IHubConnectionContext<dynamic> _clients;
 
-        public ClockService(IHubContext context)
+        public ClockService(IHubConnectionContext<dynamic> clients)
         {
-            _context = context;
+            _clients = clients;
         }
 
         public void Start()
@@ -26,7 +27,7 @@ namespace DependencyInjection
 
         private void Fire(object sender)
         {
-            _context.Clients.All.tick(DateTimeOffset.UtcNow);
+            _clients.All.tick(DateTimeOffset.UtcNow);
         }
 
         public void Stop()
